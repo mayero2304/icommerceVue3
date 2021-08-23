@@ -32,71 +32,13 @@
 
   <script src="https://unpkg.com/vue@next"></script>
   <script>
-    const { createApp, ref, reactive, toRefs, watch } = Vue;
+    const { createApp, ref, reactive, toRefs, watch, computed, onMounted } = Vue;
     const app = createApp({
       setup() {
-        const products = ref([
-          {
-            name: "Camara1",
-            price: 450_000,
-            stock: 10,
-            content: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt
-                atque dolorum corporis, reiciendis eaque temporibus quod magnam amet
-                ea natus delectus? Aut placeat ipsam minus labore voluptas. Porro,
-                vel aliquid!`,
-            images: [
-              {
-                image: "./images/camara.jpg",
-                thumbnail: "./images/camara-thumb.jpg",
-              }, {
-                image: "./images/camara-2.jpg",
-                thumbnail: "./images/camara-2-thumb.jpg",
-              }],
-            new: true,
-            offer: false,
-            quantity: 1
-          },
-          {
-            name: "Camara 2",
-            price: 550_000,
-            stock: 50,
-            content: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt
-                atque dolorum corporis, reiciendis eaque temporibus quod magnam amet
-                ea natus delectus? Aut placeat ipsam minus labore voluptas. Porro,
-                vel aliquid!`,
-            images: [
-              {
-                image: "./images/camara.jpg",
-                thumbnail: "./images/camara-thumb.jpg",
-              }, {
-                image: "./images/camara-2.jpg",
-                thumbnail: "./images/camara-2-thumb.jpg",
-              }],
-            new: true,
-            offer: false,
-            quantity: 1
-          },
-          {
-            name: "Camara3",
-            price: 850_000,
-            stock: 16,
-            content: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt
-                atque dolorum corporis, reiciendis eaque temporibus quod magnam amet
-                ea natus delectus? Aut placeat ipsam minus labore voluptas. Porro,
-                vel aliquid!`,
-            images: [
-              {
-                image: "./images/camara.jpg",
-                thumbnail: "./images/camara-thumb.jpg",
-              }, {
-                image: "./images/camara-2.jpg",
-                thumbnail: "./images/camara-2-thumb.jpg",
-              }],
-            new: true,
-            offer: false,
-            quantity: 1
-          }
-        ]);
+        onMounted(() => {
+          console.log("mounted")
+        })
+        const products = ref([]);
         function addToCart(product) {
           const prodIndex = cartState.cart.findIndex(prod => prod.name === product.name)
           if (prodIndex >= 0) {
@@ -109,15 +51,32 @@
         const cartState = reactive({
           cartOpen: false,
           cart: [],
-          total: 0
-        });
-        watch(cartState.cart, (value, oldValue) => {
-          cartState.total = cartState.cart.reduce((prev, curr) => {
-            const prevPrice = prev.price || prev;
-            const prevQuantity = prev.quantity || 1;
-            return prevPrice * prevQuantity + curr.price * curr.quantity
-          }, 0)
+          total: computed(() => {
+            return cartState.cart.reduce((prev, curr) => {
+              const prevPrice = prev.price || prev;
+              const prevQuantity = prev.quantity || 1;
+              return prevPrice * prevQuantity + curr.price * curr.quantity
+            }, 0)
+          })
+          // watch(cartState.cart, (value, oldValue) => {
+          //   cartState.total = cartState.cart.reduce((prev, curr) => {
+          //     const prevPrice = prev.price || prev;
+          //     const prevQuantity = prev.quantity || 1;
+          //     return prevPrice * prevQuantity + curr.price * curr.quantity
+          //   }, 0)
+          // })
+          // const total = computed(() => {
+          //   return cartState.cart.reduce((prev, curr) => {
+          //     const prevPrice = prev.price || prev;
+          //     const prevQuantity = prev.quantity || 1;
+          //     return prevPrice * prevQuantity + curr.price * curr.quantity
+          //   }, 0);
         })
+        fetch("https://my-json-server.typicode.com/iosamuel/demo/products")
+          .then(res => res.json())
+          .then(data => {
+            products.value = data
+          })
         return {
           ...toRefs(cartState),
           products,
